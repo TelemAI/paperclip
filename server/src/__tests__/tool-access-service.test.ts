@@ -18686,6 +18686,13 @@ describe("normalizeConnectionMethodConfig", () => {
         "X-Telem-Providers-Exclude": "serpapi",
       },
     });
+    expect(
+      normalizeConnectionMethodConfig(telemMethod, { autoRouting: "off" }),
+    ).toEqual({
+      values: { autoRouting: "off" },
+      url: "https://mcp.telem.ai/mcp",
+      headers: { "X-Telem-Auto-Routing": "off" },
+    });
     expect(() =>
       normalizeConnectionMethodConfig(telemMethod, { tier: "premium" }),
     ).toThrow("Tier has an invalid option");

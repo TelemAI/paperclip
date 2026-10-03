@@ -1591,9 +1591,12 @@ const specialMethodsFor = (entry) => {
         label: "Auto routing",
         type: "select",
         advanced: true,
-        options: [{ value: "accuracy", label: "Accuracy" }],
+        options: [
+          { value: "off", label: "Off" },
+          { value: "accuracy", label: "Accuracy" },
+        ],
         helperMd:
-          "Optional. Select Accuracy to let Telem choose the search providers for each query. Leave it unset to keep auto routing off.",
+          "Optional. Accuracy lets Telem choose the search providers for each query. Off, or no selection, keeps auto routing off.",
         transport: { location: "header", name: "X-Telem-Auto-Routing" },
       },
       {
@@ -1608,7 +1611,7 @@ const specialMethodsFor = (entry) => {
           { value: "max", label: "Max" },
         ],
         helperMd:
-          "Optional. Sets how much search work Telem does for each query. Leave it unset to use the default tier.",
+          "Optional. Sets how much search work Telem does for each query. No selection uses the Default tier.",
         transport: { location: "header", name: "X-Telem-Tier" },
       },
       providerList(
