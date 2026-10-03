@@ -5179,6 +5179,7 @@ describeEmbeddedPostgres("tool access service", () => {
         "messages-api",
         "chat-completions-api",
         "local",
+        "telem",
       ]),
     );
     expect(res.body.apps).toHaveLength(66);
@@ -18656,6 +18657,44 @@ describe("normalizeConnectionMethodConfig", () => {
   const shopifyUcpMethod = shopifyMethods.find(
     (method) => method.key === "ucp-commerce",
   )!;
+
+  it("sends Telem settings as headers and leaves unset settings out", () => {
+    const telemMethod = getConnectableAppDefinition("telem")!.methods[0]!;
+    expect(normalizeConnectionMethodConfig(telemMethod, {})).toEqual({
+      values: {},
+      url: "https://mcp.telem.ai/mcp",
+    });
+    expect(
+      normalizeConnectionMethodConfig(telemMethod, {
+        autoRouting: "accuracy",
+        tier: "extended",
+        providersInclude: "brave, exa\nbrave",
+        providersExclude: "serpapi",
+      }),
+    ).toEqual({
+      values: {
+        autoRouting: "accuracy",
+        tier: "extended",
+        providersInclude: "brave,exa",
+        providersExclude: "serpapi",
+      },
+      url: "https://mcp.telem.ai/mcp",
+      headers: {
+        "X-Telem-Auto-Routing": "accuracy",
+        "X-Telem-Tier": "extended",
+        "X-Telem-Providers-Include": "brave,exa",
+        "X-Telem-Providers-Exclude": "serpapi",
+      },
+    });
+    expect(() =>
+      normalizeConnectionMethodConfig(telemMethod, { tier: "premium" }),
+    ).toThrow("Tier has an invalid option");
+    expect(() =>
+      normalizeConnectionMethodConfig(telemMethod, {
+        providersInclude: "brave; drop",
+      }),
+    ).toThrow("Providers to include has an invalid value");
+  });
 
   it("builds a concrete Shopify endpoint from the validated store domain", () => {
     expect(
