@@ -6581,6 +6581,32 @@ describeEmbeddedPostgres("tool access service", () => {
     ).rejects.toMatchObject({ status: 400 });
   });
 
+  it("forwards Paperclip context headers by default for a Telem.AI connection", async () => {
+    const company = await createCompany(db);
+    const service = createTestToolAccessService(db);
+    mockToolsList([{ name: "telem_search" }]);
+    const result = await service.connectGalleryApp(
+      company.id,
+      {
+        galleryKey: "telem",
+        connectionMethodKey: "mcp-api-key",
+        credentialValues: { "credentials.authorization": "tlm_test-secret" },
+        configValues: { tier: "extended" },
+      },
+      { actorType: "user", actorId: "board" },
+    );
+    expect(result.connection.config).toMatchObject({
+      sourceTemplateKey: "telem",
+      methodConfig: { tier: "extended" },
+      headerPolicy: {
+        metadata: {
+          forward: ["company_id", "issue_id", "agent_id", "run_id", "project_id", "correlation_id"],
+        },
+      },
+    });
+    expect(JSON.stringify(result.connection.config)).not.toContain("tlm_test-secret");
+  });
+
   it("requires an explicit PostHog method and projects optional validated project filters", async () => {
     const company = await createCompany(db);
     const service = createTestToolAccessService(db);
