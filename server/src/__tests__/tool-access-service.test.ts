@@ -6581,6 +6581,41 @@ describeEmbeddedPostgres("tool access service", () => {
     ).rejects.toMatchObject({ status: 400 });
   });
 
+  it("keeps a saved Telem.AI header policy when the connection is reconnected", async () => {
+    const company = await createCompany(db);
+    const service = createTestToolAccessService(db);
+    const actor = { actorType: "user" as const, actorId: "board" };
+    mockToolsList([{ name: "telem_search" }]);
+    const first = await service.connectGalleryApp(
+      company.id,
+      {
+        galleryKey: "telem",
+        connectionMethodKey: "mcp-api-key",
+        credentialValues: { "credentials.authorization": "tlm_first-key" },
+      },
+      actor,
+    );
+    await service.updateConnection(first.connectionId, {
+      status: "active",
+      config: { ...first.connection.config, headerPolicy: { metadata: { forward: [] } } },
+    });
+
+    mockToolsList([{ name: "telem_search" }]);
+    const reconnected = await service.connectGalleryApp(
+      company.id,
+      {
+        galleryKey: "telem",
+        connectionMethodKey: "mcp-api-key",
+        credentialValues: { "credentials.authorization": "tlm_second-key" },
+        reconnectConnectionId: first.connectionId,
+      },
+      actor,
+    );
+
+    expect(reconnected.connectionId).toBe(first.connectionId);
+    expect(reconnected.connection.config.headerPolicy).toEqual({ metadata: { forward: [] } });
+  });
+
   it("forwards Paperclip context headers by default for a Telem.AI connection", async () => {
     const company = await createCompany(db);
     const service = createTestToolAccessService(db);

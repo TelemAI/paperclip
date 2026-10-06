@@ -53,8 +53,9 @@ sequenceDiagram
 2. In Paperclip, open **Apps**, choose **Telem.AI**, and paste the key.
 3. Optional: open **Advanced** and set the settings below.
 4. Choose which agents get access, then finish.
-5. To verify, open the connection's Test page and run `telem_providers`. It is
-   read-only and returns the list of available search providers.
+5. To verify, open the connection's **Permissions** page and click **Test**
+   beside `telem_providers`. It is read-only and returns the list of available
+   search providers.
 
 No callback URL, client registration or instance feature flag is needed.
 

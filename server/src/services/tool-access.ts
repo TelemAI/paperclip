@@ -12625,10 +12625,11 @@ export function toolAccessService(
           ...(galleryEntry.slug === "posthog" ? { safeDefault: true } : {}),
           // Telem.AI attributes each search to the Paperclip company, agent,
           // run and issue, so its catalog connection forwards those context
-          // headers by default (the gateway still drops empty values).
+          // headers by default (the gateway still drops empty values). A
+          // reconnect keeps the policy the operator saved on the connection.
           ...(galleryEntry.slug === "telem"
             ? {
-                headerPolicy: {
+                headerPolicy: asRecord(retainedConnection?.config).headerPolicy ?? {
                   metadata: {
                     forward: ["company_id", "issue_id", "agent_id", "run_id", "project_id", "correlation_id"],
                   },
